@@ -1,100 +1,79 @@
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <queue>
-#include <cstring>
-#include <climits>
+#include <bits/stdc++.h>
 
 using namespace std;
 
-const int MAX_ROWS = 500;
-const int MAX_COLS = 200;
+const int MAX_SIZE = 100;
 
-int matrix[MAX_ROWS][MAX_COLS]; // 2D array to store the matrix
-int rows, cols; // variables to store the number of rows and columns in the matrix
+struct Node {
+    int x, y;
+    double distance;
+    vector<pair<int, int>> path;
+    
+    Node(int x, int y, double distance): x(x), y(y), distance(distance) {}
+};
 
-// helper function to check if a cell is valid (within matrix bounds and unblocked)
-bool isValid(int i, int j) {
-    return i >= 0 && i < rows && j >= 0 && j < cols && matrix[i][j] == 0;
+bool isValid(int x, int y, int N) {
+    return (x >= 0 && x < N && y >= 0 && y < N);
 }
 
-// Dijkstra's algorithm for finding shortest path from source to destination
-int dijkstra(int src_i, int src_j, int dest_i, int dest_j) {
-    int dist[MAX_ROWS][MAX_COLS];
-    memset(dist, INT_MAX, sizeof(dist));
-
-    priority_queue<pair<int, pair<int, int>>, vector<pair<int, pair<int, int>>>, greater<pair<int, pair<int, int>>>> pq;
-    pq.push({0, {src_i, src_j}});
-    dist[src_i][src_j] = 0;
-
+double shortestPath(int matrix[][MAX_SIZE], int srcX, int srcY, int destX, int destY, int N) {
+    vector<pair<int, int>> directions = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}, {-1, -1}, {1, 1}, {-1, 1}, {1, -1}};
+    vector<vector<bool>> visited(N, vector<bool>(N, false));
+    priority_queue<Node*, vector<Node*>, function<bool(Node*, Node*)>> pq([](Node* a, Node* b) { return a->distance > b->distance; });
+    pq.push(new Node(srcX, srcY, 0.0));
+    
     while (!pq.empty()) {
-        pair<int, pair<int, int>> curr = pq.top();
+        Node* curr = pq.top();
         pq.pop();
-        int curr_i = curr.second.first, curr_j = curr.second.second;
-
-        // reached destination
-        if (curr_i == dest_i && curr_j == dest_j) {
-            return dist[curr_i][curr_j];
+        
+        int x = curr->x;
+        int y = curr->y;
+        
+        if (x == destX && y == destY) {
+            cout << "Shortest path: ";
+            for (auto p : curr->path) {
+                cout << "(" << p.first << "," << p.second << ") ";
+            }
+            cout << "(" << x << "," << y << ")\n";
+            
+            double shortestDist = curr->distance;
+            delete curr;
+            return shortestDist;
         }
-
-        // explore neighboring cells (up, down, left, right, diagonal)
-        for (int i = curr_i-1; i <= curr_i+1; i++) {
-            for (int j = curr_j-1; j <= curr_j+1; j++) {
-                if (isValid(i, j)) {
-                    int cost = 1; // cost of moving to neighboring cell
-                    if (i != curr_i && j != curr_j) {
-                        cost = 2; // cost of diagonal movement
-                    }
-                    if (dist[curr_i][curr_j] + cost < dist[i][j]) {
-                        dist[i][j] = dist[curr_i][curr_j] + cost;
-                        pq.push({dist[i][j], {i, j}});
-                    }
-                }
+        
+        if (visited[x][y]) {
+            delete curr;
+            continue;
+        }
+        
+        visited[x][y] = true;
+        for (auto dir : directions) {
+            int nextX = x + dir.first;
+            int nextY = y + dir.second;
+            if (isValid(nextX, nextY, N) && matrix[nextX][nextY] == 1 && !visited[nextX][nextY]) {
+                double nextDist = curr->distance + (dir.first == 0 || dir.second == 0 ? 1.0 : sqrt(2.0));
+                Node* nextNode = new Node(nextX, nextY, nextDist);
+                nextNode->path = curr->path;
+                nextNode->path.push_back({x, y});
+                pq.push(nextNode);
             }
         }
+        
+        delete curr;
     }
-
-    // destination not reachable
-    return -1;
+    
+    return INT_MAX;
 }
 
 int main() {
-    // open the file for reading
-    ifstream infile("matrix.txt");
-
-    // read the matrix from the file
-    // infile >> rows >> cols;
-    rows=200;
-    cols=500;
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            infile >> matrix[i][j];
-        
-        }
-    }
-
-    ofstream outfile("matrix2.txt");
-
-    // write the matrix to the file
-    for (int i = 0; i < 500; i++) {
-        for (int j = 0; j < 200; j++) {
-            outfile << matrix[i][j] << " ";
-        }
-        outfile << endl;
-    }
-
-    // close the file
-    infile.close();
-
-    // example usage: find shortest path from (10, 10) to (150, 400)
-    int src_i = 0, src_j = 0, dest_i = 0, dest_j = 1;
-    int dist = dijkstra(src_i, src_j, dest_i, dest_j);
-
-    if (dist == -1) {
-        cout << "Destination not reachable from source" << endl;
+    int matrix[MAX_SIZE][MAX_SIZE] = {{1, 1, 0}, {0, 0, 1}, {1, 1, 1}};
+    int N = 3;
+    int srcX = 0, srcY = 0, destX = 2, destY = 2;
+    double shortestDist = shortestPath(matrix, srcX, srcY, destX, destY, N);
+    if (shortestDist == INT_MAX) {
+        cout << "Destination not reachable\n";
     } else {
-        cout << "Shortest path length from (" << src_i << ", " << src_j << ") to (" << dest_i << ", " << dest_j << ") = " << dist << endl;
+        cout << "Shortest distance: " << shortestDist << endl;
     }
-
     return 0;
 }
