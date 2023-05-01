@@ -12,17 +12,31 @@ vector<vector<int>>mat;
 
 
 bool isValid(int x, int y, int m, int n,int var) {
-    return (x >= 0 && x < m && y >= 0 && y < n && (mat[x][y] == 0 || mat[x][y] == '*' || mat[x][y] == var));
+    return (x >= 0 && x < m && y >= 0 && y < n && (mat[x][y] == 0 || mat[x][y] == '*' || mat[x][y] == var ||mat[x][y]=='@'));
 }
+
+
+
+
+
 
 
 bool isBlocked(int x, int y) {
     return mat[x][y] == 0;
 }
 
+
+
+
+
 int getNodeId(int x, int y, int n) {
     return x * n + y;
 }
+
+
+
+
+
 
 void dijkstra(int startX, int startY, int endX, int endY, int m, int n,int var) {
     for (int i = 0; i < m * n; i++) {
@@ -59,6 +73,11 @@ void dijkstra(int startX, int startY, int endX, int endY, int m, int n,int var) 
     }
 }
 
+
+
+
+
+
 vector<array<int,2>> shortestPath(int startX, int startY, int endX, int endY, int m, int n,int var) {
     dijkstra( startX, startY, endX, endY, m, n,var);
     vector<float> path;
@@ -71,7 +90,6 @@ vector<array<int,2>> shortestPath(int startX, int startY, int endX, int endY, in
     array<int,2>arr;
     vector<array<int,2>>pp;
     for (int i = 0; i < path.size(); i++) {
-        cout<<path[i]<<endl;
         arr[0] = path[i] / n;
         arr[1] = int(path[i]) % n;
         // cout << "(" << x << "," << y << ")";
@@ -82,6 +100,11 @@ vector<array<int,2>> shortestPath(int startX, int startY, int endX, int endY, in
 }
 
 
+
+
+
+
+
 float Dist(vector<array<int,2>>path){
     float dist=0.00;
     int x=0,y=0;
@@ -90,14 +113,10 @@ float Dist(vector<array<int,2>>path){
                 
         x = path[i][0];
         y = path[i][1];
-        // mat[x][y]='@';
-
-        // dist+=mat[x][y];
 
         if(x1+1==x && y1+1==y){
             dist+=1.414;
         }
-
         else{
             dist+=1;
         }
@@ -108,29 +127,37 @@ float Dist(vector<array<int,2>>path){
 }
 
 
+
+
+
+
 void inputmatrix(){
     ifstream infile("kanishkjob.txt");
-    int m=300;
-    int n=169;
+
     char ch;
     int i=0;
-    int j=0;
     infile.get(ch);
+    mat.push_back({});
     while(!infile.eof()){
         mat[i].push_back(ch);
-    }
-
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < n; j++) {
-            infile.get(ch); mat[i][j]=ch;
+        if(ch=='\n'){
+            mat.push_back({});
+            i++;
         }
+        infile.get(ch);
+
     }
 }
 
+
+
+
+
+
 void outputmatrix(){
     ofstream outfile("output.txt");
-    int m=300;
-    int n=169;
+    int m=mat.size()-1;
+    int n=mat[0].size();
     char ch='*';
 
 
@@ -145,9 +172,14 @@ void outputmatrix(){
 
 
 
-
-
-
+void setpath(vector<array<int,2>> path){
+    int x,y;
+    for (int i = 0; i < path.size(); i++) {
+        x = path[i][0];
+        y = path[i][1];
+        mat[x][y]='@';
+    }
+}
 
 
 
@@ -158,83 +190,56 @@ int main() {
     
     ifstream infile("kanishkjob.txt");
     ofstream outfile("output.txt");
+    inputmatrix();
 
 
     int m, n;
-    m=300;
-    n=169;
+    m=mat.size()-1;
+    n=mat[0].size();
     char ch;
 
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < n; j++) {
-            infile.get(ch); mat[i][j]=ch;
-        }
-    }
+    // for (int i = 0; i < m; i++) {
+    //     for (int j = 0; j < n; j++) {
+    //         infile.get(ch); mat[i][j]=ch;
+    //     }
+    // }
+
     
+
     int startX, startY, endX, endY;
     startX=0;
-    startY=0;
+    startY=160;
     endX=234;
     endY=76;
+    int par='*';
     for(int var=1;var<4;var++){
         if(var==1){
-            var='*';
+            par='*';
             cout<<"Normal Path:\n";
         }
         else if(var==2){
-            var='W';
+            par='W';
             cout<<"River Path:\n";
         }
         else if(var==3){
-            var='X';
+            par='X';
             cout<<"Mountai Path:\n";
         }
-        vector<array<int,2>> path = shortestPath( startX, startY, endX, endY, m, n,var);
-        
-        int x=0,y=0;
-        int x1=0,y1=0;
-        float dist=0.00;
-
-        if (path.empty()) {
-            cout << "No path found" << endl;
-        }
-        else{
-            
-            for (int i = 0; i < path.size(); i++) {
-                
-                x = path[i][0];
-                y = path[i][1];
-                mat[x][y]='@';
-
-                // dist+=mat[x][y];
-
-                if(x1+1==x && y1+1==y){
-                    dist+=1.414;
-                }
-
-                else{
-                    dist+=1;
-                }
-
-                x1=x;y1=y;
-                cout << "(" << x << "," << y << ")";
-                if (i != path.size() - 1) {
-                    cout << " -> ";
-                }
-            }
-            cout << endl;
-
-            cout<<"distance:"<<dist<<endl<<endl;
-        }
+        vector<array<int,2>> path = shortestPath( startX, startY, endX, endY, m, n,par);
+        setpath(path);
+        outputmatrix();
+        cout<<Dist(path)<<endl;
     }
+    // return 0;
 
 
 
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < n; j++) {
-            outfile.put(char(mat[i][j]));
-        }
-    }
+    outputmatrix();
+    // for (int i = 0; i < m; i++) {
+    //     for (int j = 0; j < n; j++) {
+    //         outfile.put(char(mat[i][j]));
+    //     }
+    // }
     
     cout<<"\n=============================\n";
     return 0;
