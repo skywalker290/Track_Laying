@@ -21,7 +21,7 @@ void makecities()
     int i;
     for(i=0;i<x_cr.size();i++)
     {
-        if(mat[x_cr[i]][y_cr[i]]=='*')
+        if(mat[x_cr[i]][y_cr[i]]=='*' || mat[x_cr[i]][y_cr[i]]=='@')
         {
             mat[x_cr[i]][y_cr[i]]='C';
         }
@@ -56,16 +56,15 @@ int getNodeId(int x, int y, int n) {
 
 
 
-
+priority_queue<pair<float, int>, vector<pair<float, int>>, greater<pair<float, int>>> pq;
 void dijkstra(int startX, int startY, int endX, int endY, int m, int n,int var) {
     for (int i = 0; i < m * n; i++) {
         dist[i] = numeric_limits<float>::max();
         parent[i] = -1;
     }
     dist[getNodeId(startX, startY, n)] = 0;
-    priority_queue<pair<float, int>, vector<pair<float, int>>, greater<pair<float, int>>> pq;
     pq.push(make_pair(0, getNodeId(startX, startY, n)));
-    while (!pq.empty()) {
+    while (!pq.empty()){
         int u = pq.top().second;
         pq.pop();
         int x = u / n;
@@ -116,6 +115,29 @@ vector<array<int,2>> shortestPath(int startX, int startY, int endX, int endY, in
         pp.push_back(arr);
     }
     return pp;
+}
+
+vector<float> path1;
+float shortestdist(int startX, int startY, int endX, int endY, int m, int n,int var) {
+    dijkstra( startX, startY, endX, endY, m, n,var);
+    
+    int curr = getNodeId(endX, endY, n);
+    while (curr != -1) {
+        path1.push_back(curr);
+        curr = parent[curr];
+    }
+    return path1[0];
+    // reverse(path1.begin(), path1.end());
+    // array<int,2>arr;
+    // vector<array<int,2>>pp;
+    // for (int i = 0; i < path.size(); i++) {
+    //     arr[0] = path[i] / n;
+    //     arr[1] = int(path[i]) % n;
+    //     // cout << "(" << x << "," << y << ")";
+
+    //     pp.push_back(arr);
+    // }
+    // return pp;
 }
 
 
@@ -312,16 +334,51 @@ void setpath(vector<array<int,2>> path){
 void Algo2(){
     int m=mat.size()-1;
     int n=mat[0].size();
-    vector<double>value(x_cr.size(),INT_MAX);
+    int I=0;
+    int J=0;
+    int d=0;
+    int counter=1;
+    float progress=0.00;
+    vector<float>value(x_cr.size(),INT_MAX);
+    vector<array<int,2>> path;
     for(int i=0;i<m;i++){
         for(int j=0;j<n;j++){
-            for(int k=0;k<x_cr.size();k++){
-                vector<array<int,2>> path = shortestPath( i, j, x_cr[k], x_cr[k], m, n,'*');
-                value[k]=min(Dist(path),value[k]);
+            for(int k=0;k<5;k++){
+                counter++;
+                // progress=((counter*100)/(m*n));
+                progress=counter;
+                cout<<"("<<progress<<"/"<<m*n*x_cr.size()<<")"<<endl;
+                d= shortestdist( i, j, x_cr[k], x_cr[k], m, n,'*');
+                if(value[k]>d){
+                    value[k]=d;
+                    I=i;
+                    J=j;
+                }
+                system("clear");
             }
-            
         }
+        
     }
+
+    for(int k=0;k<x_cr.size();k++){
+        I+=x_cr[k];
+        J+=y_cr[k];
+
+        I=I/x_cr.size();
+        J=J/x_cr.size();
+    }
+    
+
+
+    for(int k=0;k<x_cr.size();k++){
+        vector<array<int,2>> path = shortestPath( I, J, x_cr[k], x_cr[k], m, n,'*');
+        // int d=Dist(path);
+        setpath(path);
+    }
+    mat[I][J]='#';
+    makecities();
+
+
 
 
     
@@ -380,8 +437,10 @@ int main() {
     // }
     // return 0;
 
-    makecities();
-    algo1();
+    // makecities();
+    Algo2();
+
+    
 
     outputmatrix();
     // for (int i = 0; i < m; i++) {
