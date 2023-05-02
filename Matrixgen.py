@@ -28,7 +28,7 @@
 
 from PIL import Image
 
-img = Image.open("map.jpeg")
+img = Image.open("mapss.jpeg")
 
 width, height = img.size
 matrix = [[None] * width for _ in range(height)]

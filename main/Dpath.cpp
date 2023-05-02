@@ -1,13 +1,18 @@
 #include <bits/stdc++.h>
 using namespace std;
+
+
 void bfs(int sx,int sy,vector<array<int,2>> &markedPath);
+
+
+
 const int matmax1=500;
 const int matmax2=200;
-const int MAXN = 1005; 
+const int MAXN = 10000; 
 float dist[100000];
 float parent[100000];
-int mat[matmax1][matmax2];
-//vector<vector<int>>mat;
+// int mat[matmax1][matmax2];
+vector<vector<int>>mat;
 vector<int>x_cr={5,92,150,195,241};
 vector<int>y_cr={7,20,167,158,15};
 
@@ -147,8 +152,8 @@ void algo1()
 {
     //vector<int>x_cr;
     //vector<int>y_cr;
-    int m=300;
-    int n=169;
+    int m=mat.size()-1;
+    int n=mat[0].size();
     int n1=x_cr.size();
     vector<array<int,2>>t;
     vector<array<int,2>>lp;
@@ -187,37 +192,44 @@ void algo1()
 
 void bfs(int sx,int sy,vector<array<int,2>> &markedPath)
 {
-    int m=300, n=169; // dimensions of the matrix
+    int m=mat.size()-1, n=mat[0].size(); // dimensions of the matrix
     bool visited[MAXN][MAXN]; // keep track of visited cells
     int dist[MAXN][MAXN]; // distance from starting point to each cell
     pair<int, int> prev[MAXN][MAXN]; // previous cell in the shortest path
     memset(visited, false, sizeof visited);
     memset(dist, -1, sizeof dist);
+    
+    
     // initialize starting point
     queue<pair<int, int>> q;
     q.push({sx, sy});
     visited[sx][sy] = true;
     dist[sx][sy] = 0;
+    
     // perform BFS
     while (!q.empty()) {
         int x = q.front().first, y = q.front().second;
         q.pop();
+        int flag=0;
         // check if current cell is on the marked path
         for (auto p : markedPath) {
             int px = p[0], py = p[1];
             if (x == px && y == py)
             {
+                flag=1;
                 break;
-                break;
+                
             } 
                 
         }
+        if(flag)break;
+
         // explore neighbors
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -1; dy <= 1; dy++) {
                 if (dx == 0 && dy == 0) continue;
                 int nx = x + dx, ny = y + dy;
-                if (isValid(nx, ny,m,n,0) && !visited[nx][ny]) {
+                if (isValid(nx, ny,m,n,'*') && !visited[nx][ny]) {
                     visited[nx][ny] = true;
                     dist[nx][ny] = dist[x][y] + 1;
                     prev[nx][ny] = {x, y}; // update previous cell
@@ -231,10 +243,10 @@ void bfs(int sx,int sy,vector<array<int,2>> &markedPath)
     int px,py;
     int x = markedPath[markedPath.size()-1][0], y =  markedPath[markedPath.size()-1][1];
     //path.push_back({x, y});
-    while (x != sx || y != sy) {
+    while (x != sx || y != sy){
         tie(px, py) = prev[x][y];
         mat[x][y]='@';
-        //path.push_back({px, py});
+        // path.push_back({px, py});
         x = px;
         y = py;
     }
@@ -297,6 +309,28 @@ void setpath(vector<array<int,2>> path){
 
 
 
+void Algo2(){
+    int m=mat.size()-1;
+    int n=mat[0].size();
+    vector<double>value(x_cr.size(),INT_MAX);
+    for(int i=0;i<m;i++){
+        for(int j=0;j<n;j++){
+            for(int k=0;k<x_cr.size();k++){
+                vector<array<int,2>> path = shortestPath( i, j, x_cr[k], x_cr[k], m, n,'*');
+                value[k]=min(Dist(path),value[k]);
+            }
+            
+        }
+    }
+
+
+    
+
+
+}
+
+
+
 
 
 int main() {
@@ -326,24 +360,24 @@ int main() {
     endX=234;
     endY=76;
     int par='*';
-    for(int var=1;var<4;var++){
-        if(var==1){
-            par='*';
-            cout<<"Normal Path:\n";
-        }
-        else if(var==2){
-            par='W';
-            cout<<"River Path:\n";
-        }
-        else if(var==3){
-            par='X';
-            cout<<"Mountai Path:\n";
-        }
-        vector<array<int,2>> path = shortestPath( startX, startY, endX, endY, m, n,par);
-        setpath(path);
-        outputmatrix();
-        cout<<Dist(path)<<endl;
-    }
+    // for(int var=1;var<4;var++){
+    //     if(var==1){
+    //         par='*';
+    //         cout<<"Normal Path:\n";
+    //     }
+    //     else if(var==2){
+    //         par='W';
+    //         cout<<"River Path:\n";
+    //     }
+    //     else if(var==3){
+    //         par='X';
+    //         cout<<"Mountai Path:\n";
+    //     }
+    //     vector<array<int,2>> path = shortestPath( startX, startY, endX, endY, m, n,par);
+    //     setpath(path);
+    //     outputmatrix();
+    //     cout<<Dist(path)<<endl;
+    // }
     // return 0;
 
     makecities();
